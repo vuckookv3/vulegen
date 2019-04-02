@@ -2,8 +2,7 @@ const express = require('express');
 const cookieParser = require('cookie-parser');
 const cors = require('cors');
 const mongoose = require('mongoose');
-
-const { envChecker } = require('./config');
+const helmet = require('helmet');
 const { AppError } = require('./helpers');
 const indexRouter = require('./routes');
 require('dotenv').config();
@@ -14,9 +13,12 @@ const app = express();
 // database
 if (!!process.env['DB_HOST']) {
 	const dbOptions = { useNewUrlParser: true, useCreateIndex: true };
-	mongoose.connect(process.env.DB_HOST, dbOptions);
+	mongoose.connect(process.env.DB_HOST, dbOptions).catch(err => console.error(`Error connecting to DB:\n${err}`));
+} else {
+	console.error(`Please put your MongoDB connection string in .env file.`);
 }
 
+app.use(helmet());
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());

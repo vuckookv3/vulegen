@@ -68,14 +68,22 @@ function init(name) {
     fs.writeFileSync(makePath('./middlewares/index.js'), t.middlewares())
 
     fs.mkdirSync(makePath('./models'))
-    fs.writeFileSync(makePath('./models/index.js'), t.export());
+    fs.writeFileSync(makePath('./models/index.js'), t.export(`\tAdmin: require('./Admin'),\n\tUser: require('./User'),`));
+    fs.writeFileSync(makePath('./models/User.js'), t.User());
+    fs.writeFileSync(makePath('./models/Admin.js'), t.Admin());
 
     fs.mkdirSync(makePath('./routes'))
     fs.writeFileSync(makePath('./routes/index.js'), t.mainRouter());
-    fs.mkdirSync(makePath('./routes/admin'))
-    fs.writeFileSync(makePath('./routes/admin/index.js'), t.router());
-    fs.mkdirSync(makePath('./routes/front'))
-    fs.writeFileSync(makePath('./routes/front/index.js'), t.router());
+
+    fs.mkdirSync(makePath('./routes/admin'));
+    fs.writeFileSync(makePath('./routes/admin/index.js'), t.router(`router.use('/admins', require('./admins'));\nrouter.use('/users', require('./users'))`));
+    fs.writeFileSync(makePath('./routes/admin/auth.js'), t.auth('Admin'));
+    fs.writeFileSync(makePath('./routes/admin/admins.js'), t.modelRouter('Admin'));
+    fs.writeFileSync(makePath('./routes/admin/users.js'), t.modelRouter('User'));
+
+    fs.mkdirSync(makePath('./routes/front'));
+    fs.writeFileSync(makePath('./routes/front/index.js'), t.router(`router.use('/auth', require('./auth'));`));
+    fs.writeFileSync(makePath('./routes/front/auth.js'), t.auth('User'));
 
     fs.writeFileSync(makePath('./.env'), t.env());
     fs.writeFileSync(makePath('./.gitignore'), t.gitignore());
@@ -102,8 +110,8 @@ function add(name) {
     const makePath = (fold = '') => path.join(thisdir, fold);
 
     // check if it is vulegen project
-    if (!fs.existsSync(makePath('./package.json'))) return console.error('package.json not located in current directory.');
-    let packagejson = fs.readFileSync(makePath('./package.json'), { encoding: 'UTF8' });
+    if (!fs.existsSync(makePath('./package.json'))) return console.error('package.json is not located in the current directory.');
+    let packagejson = fs.readFileSync(makePath('./package.json'), 'utf-8');
     packagejson = JSON.parse(packagejson);
     if (!(packagejson.vulegen == true)) return console.error(colors.yellow(`This project is not generated with vulegen. You can't do this action`));
 

@@ -1,0 +1,36 @@
+const express = require('express');
+const router = express.Router();
+const { aW, AppError } = require('../../helpers');
+const { <%= name %> } = require('../../models');
+const { <%= name == 'User' ? 'isLoggedIn' : 'isAdmin' %> } = require('../../middlewares');
+
+router.post('/login', aW(async (req, res) => {
+    const { username, password } = req.body;
+
+    const user = await <%= name %>.findOne({ username }).exec();
+    if (!user) throw new AppError(404);
+
+    const isMatch = await user.comparePassword(password);
+    if (!isMatch) throw new AppError(404);
+
+    res.json({ token: 'JWT ' + user.generateJWT() })
+}));
+
+<% if (name == 'User') { %>
+router.post('/register', aW(async (req, res) => {
+    const { username, password } = req.body;
+
+    const newUser = new User({
+        username,
+        password,
+    });
+    await newUser.save();
+
+    res.json({ status: 'OK' });
+}));
+<% } %>
+router.get('/me', <%= name == 'User' ? 'isLoggedIn' : 'isAdmin' %>, aW(async (req, res) => {
+    res.json(req.user);
+}));
+
+module.exports = router;

@@ -27,5 +27,8 @@ module.exports = {
     apperror: () => renderEjs('apperror'),
     middlewares: () => renderEjs('middlewares'),
     schema: (name) => renderEjs('schema', { name }),
-    modelRouter: (name) => renderEjs('modelrouter', { name })
+    modelRouter: (name) => renderEjs('modelrouter', { name }),
+    User: () => renderEjs('User'),
+    Admin: () => renderEjs('Admin'),
+    auth: (name) => renderEjs('auth', { name }),
 }
