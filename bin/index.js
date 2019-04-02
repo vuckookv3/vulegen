@@ -22,11 +22,14 @@ program
 program
     .command('add <Model>')
     .description('Add a new Model')
-    .action((model) => {
-        console.log('add model', model)
+    .option('-u, --user [crud]', 'Make user routes.', 'crud')
+    .option('-a, --admin [crud]', 'Make admin routes.', 'crud')
+    .action((model, options) => {
+        add(model);
     });
 
-program.command('delete <Model>')
+program
+    .command('delete <Model>')
     .description('Deletes a Model')
     .action(() => {
         console.log('delete model')
@@ -40,11 +43,10 @@ if (!process.argv.slice(2).length || !['init', 'add', 'delete'].includes(process
 
 
 function init(name) {
-    // check name and folder avaibility
-    if (!name) return console.error('\x1b[31m%s\x1b[0m', 'You must specify name of the project as second argument.');
+
     name = name.toLowerCase();
     const pathToProject = path.join(thisdir, name);
-    if (fs.existsSync(pathToProject)) return console.error('\x1b[31m%s\x1b[0m', 'Folder with that name already exists in this location.');
+    if (fs.existsSync(pathToProject)) return console.error(colors.red('Folder with that name already exists in this location.'));
 
     const makePath = (fold = '') => path.join(pathToProject, fold);
 
@@ -93,7 +95,7 @@ function init(name) {
     console.log(`\t$ vulegen add Post`);
     console.log('\nRun the app: ');
     console.log(`\t$ npm start`);
-    console.log(colors.green('\nDONE.\n'))
+    console.log(colors.green('\nDONE.\n'));
 }
 
 function add(name) {
@@ -103,52 +105,32 @@ function add(name) {
     if (!fs.existsSync(makePath('./package.json'))) return console.error('package.json not located in current directory.');
     let packagejson = fs.readFileSync(makePath('./package.json'), { encoding: 'UTF8' });
     packagejson = JSON.parse(packagejson);
-    if (!(packagejson.vulegen == true)) return console.error(`This is not generated with vulegen. You can't do this action.`);
+    if (!(packagejson.vulegen == true)) return console.error(colors.yellow(`This project is not generated with vulegen. You can't do this action`));
 
     const { singular, plural } = word(name);
 
-    if (fs.existsSync(makePath(`./models/${singular}.js`))) return console.error(`Model with that name already exists.`);
+    if (fs.existsSync(makePath(`./models/${singular}.js`))) return console.error(colors.red(`Model with that name already exists.`));
 
-    // make model
+    // make model and update exports
     fs.writeFileSync(makePath(`./models/${singular}.js`), t.schema(singular));
-    const modelIndex = fs.readFileSync(makePath('./models/index.js'), { encoding: 'UTF8' });
-    let newModelIndex = modelIndex.split('\n');
-    newModelIndex = newModelIndex.slice(1, newModelIndex.length - 1).filter(e => !!e)
-    newModelIndex.push(`\t${singular}: require('./${singular}'),`)
-    newModelIndex = newModelIndex.sort();
-    newModelIndex.unshift(`module.exports = {`);
-    newModelIndex.push(`}`)
-    newModelIndex = newModelIndex.join('\n')
-    fs.writeFileSync(makePath('./models/index.js'), newModelIndex);
+    let modelIndex = fs.readFileSync(makePath('./models/index.js'), 'utf-8');
+    modelIndex = rewriteModelExports(singular, modelIndex);
+    fs.writeFileSync(makePath('./models/index.js'), modelIndex);
 
     // make routes
     fs.writeFileSync(makePath(`./routes/admin/${plural}.js`), t.modelRouter(singular));
     fs.writeFileSync(makePath(`./routes/front/${plural}.js`), t.modelRouter(singular));
 
     // edit routes exports
-    let adminRouter = fs.readFileSync(makePath('./routes/admin/index.js'), { encoding: 'UTF8' });
-    adminRouter = adminRouter.split('\n');
-    adminRouter = adminRouter.slice(2, adminRouter.length - 1).filter(e => !!e);
-    adminRouter.push(`router.use('/${plural}', require('./${plural}'));`);
-    adminRouter = adminRouter.sort();
-    adminRouter.unshift(`const router = express.Router();\n`);
-    adminRouter.unshift(`const express = require('express');`)
-    adminRouter.push(`\nmodule.exports = router;`)
-    adminRouter = adminRouter.join('\n');
+    let adminRouter = fs.readFileSync(makePath('./routes/admin/index.js'), 'utf-8');
+    adminRouter = rewriteRouterExport(plural, adminRouter);
     fs.writeFileSync(makePath('./routes/admin/index.js'), adminRouter);
 
-    let frontRouter = fs.readFileSync(makePath('./routes/front/index.js'), { encoding: 'UTF8' });
-    frontRouter = frontRouter.split('\n');
-    frontRouter = frontRouter.slice(2, frontRouter.length - 1).filter(e => !!e);
-    frontRouter.push(`router.use('/${plural}', require('./${plural}'));`);
-    frontRouter = frontRouter.sort();
-    frontRouter.unshift(`const router = express.Router();\n`);
-    frontRouter.unshift(`const express = require('express');`)
-    frontRouter.push(`\nmodule.exports = router;`)
-    frontRouter = frontRouter.join('\n');
+    let frontRouter = fs.readFileSync(makePath('./routes/front/index.js'), 'utf-8');
+    frontRouter = rewriteRouterExport(plural, frontRouter);
     fs.writeFileSync(makePath('./routes/front/index.js'), frontRouter);
 
-    console.log('DONE')
+    console.log(colors.green('\nDONE.\n'));
 }
 
 
@@ -170,4 +152,41 @@ function word(name) {
     singular = singular.charAt(0).toUpperCase() + singular.slice(1);
 
     return { singular, plural };
+}
+
+function rewriteModelExports(singular, str) {
+    let arr = str
+        .split('\n')
+        .map(e => e.trim())
+        .filter(e => !!e)
+        .filter(e => !(e.startsWith('module') || e.startsWith('}')))
+        .map(e => `\t${e}`);
+
+    arr.push(`\t${singular}: require('./${singular}'),`);
+    arr = arr.sort();
+    return [
+        `module.exports = {`,
+        ...arr,
+        `};`
+    ].join('\n');
+}
+
+function rewriteRouterExport(plural, str) {
+    let arr = str
+        .split('\n')
+        .map(e => e.trim())
+        .filter(e => !!e)
+        .filter(e => !(e.startsWith('const') || e.startsWith('module')))
+
+    arr.push(`router.use('/${plural}', require('./${plural}'))`);
+    arr = arr.sort();
+
+    return [
+        `const express = require('express');`,
+        `const router = express.Router();`,
+        ``,
+        ...arr,
+        ``,
+        `module.exports = router;`
+    ].join('\n');
 }
