@@ -1,15 +1,15 @@
 {
   "name": "vulegen",
   "version": "1.0.0",
-  "description": "ee",
+  "description": "Express API Server Generator",
+  "author": "Marko Vucetic <vuckoo@hotmail.com>",
   "main": "bin/index.js",
   "scripts": {
-    "test": "ee",
     "start": "node ./bin/index.js"
   },
   "repository": {
     "type": "git",
-    "url": "ee"
+    "url": "https://github.com/vuckookv3/vulegen"
   },
   "keywords": [
     "express",
@@ -23,7 +23,6 @@
     "api",
     "jwt"
   ],
-  "author": "Marko Vucetic",
   "license": "ISC",
   "preferGlobal": true,
   "bin": {
