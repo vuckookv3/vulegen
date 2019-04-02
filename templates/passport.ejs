@@ -14,7 +14,7 @@ passport.use('jwt', new JWTStrategy({
         console.error('USER JWT STRATEGY ERROR: \n', err)
         return cb(err, false);
     }
-}))
+}));
 
 
 passport.use('admin', new JWTStrategy({
@@ -22,11 +22,11 @@ passport.use('admin', new JWTStrategy({
     secretOrKey: process.env.ADMIN_JWT
 }, async (jwt, cb) => {
     try {
-        const admin = await Admin.findById(jwt.id).exec();
+        const admin = await Admin.findById(jwt._id).exec();
         if (!admin) return cb(null, false);
         return cb(null, admin);
     } catch (err) {
         console.error('ADMIN JWT STRATEGY ERROR: \n', err)
         return cb(err, false);
     }
-}))
+}));

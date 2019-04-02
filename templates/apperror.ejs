@@ -18,7 +18,7 @@ class AppError {
     constructor(status, info, message) {
         this.status = status || 500;
         this.info = info || undefined;
-        this.message = message || httpErrorMessage(status);
+        this.message = message || httpStatusMessage(status);
 
         if (this.status >= 500) {
             console.error(this)
