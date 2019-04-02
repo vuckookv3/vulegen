@@ -1,0 +1,51 @@
+const express = require('express');
+const router = express.Router();
+const { aW, AppError } = require('../../helpers');
+const { <%= name %> } = require('../../models');
+
+// INDEX
+router.get('/', aW(async (req, res) => {
+    const found = await <%= name %>.find({}).exec();
+    res.json(found);
+}));
+
+// CREATE
+router.post('/', aW(async (req, res) => {
+    const doc = new <%= name %>({ ...req.body });
+
+    await doc.save();
+
+    res.json(doc);
+}));
+
+// SHOW
+router.get('/:id', aW(async (req, res) => {
+    const found = await <%= name %>.findById(req.params.id).exec();
+    if (!found) throw new AppError(404);
+    res.json(found);
+}));
+
+// UPDATE
+router.put('/:id', aW(async (req, res) => {
+    const found = await <%= name %>.findById(req.params.id).exec();
+    if (!found) throw new AppError(404);
+
+    found.set({ ...req.body });
+    await found.save();
+
+    res.json(found);
+}));
+
+// DELETE
+router.delete('/:id', aW(async (req, res) => {
+    const found = await <%= name %>.findById(req.params.id).exec();
+    if (!found) throw new AppError(404);
+
+    await found.remove();
+
+    res.json(found);
+}));
+
+
+module.exports = router;
+

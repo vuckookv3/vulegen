@@ -1,0 +1,38 @@
+{
+  "name": "vulegen",
+  "version": "1.0.0",
+  "description": "ee",
+  "main": "bin/index.js",
+  "scripts": {
+    "test": "ee",
+    "start": "node ./bin/index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "ee"
+  },
+  "keywords": [
+    "express",
+    "mongoose",
+    "passport",
+    "generator",
+    "rest",
+    "restful",
+    "router",
+    "app",
+    "api",
+    "jwt"
+  ],
+  "author": "Marko Vucetic",
+  "license": "ISC",
+  "preferGlobal": true,
+  "bin": {
+    "vulegen": "./bin/index.js"
+  },
+  "dependencies": {
+    "colors": "^1.3.3",
+    "commander": "^2.19.0",
+    "ejs": "^2.6.1",
+    "pluralize": "^7.0.0"
+  }
+}

@@ -1,0 +1,16 @@
+const mongoose = require('mongoose');
+const { Schema, model } = mongoose;
+
+const <%= name %>Schema = new Schema({
+
+}, { timestamps: true });
+
+<%= name %>Schema.pre('save', async function () {
+
+});
+
+<%= name %>Schema.pre('remove', async function () {
+
+});
+
+module.exports = model('<%= name %>', <%= name %>Schema);

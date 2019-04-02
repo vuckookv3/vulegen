@@ -1,0 +1,8 @@
+const passport = require('passport');
+const { AppError } = require('../helpers');
+const m = {};
+
+m.isLoggedIn = (req, res, next) => passport.authenticate(['jwt'], { session: false })(req, res, next);
+m.isAdmin = (req, res, next) => passport.authenticate('admin', { session: false })(req, res, next);
+
+module.exports = m;
