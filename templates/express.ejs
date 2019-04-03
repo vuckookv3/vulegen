@@ -1,3 +1,4 @@
+require('dotenv').config();
 const express = require('express');
 const cookieParser = require('cookie-parser');
 const cors = require('cors');
@@ -5,7 +6,6 @@ const mongoose = require('mongoose');
 const helmet = require('helmet');
 const { AppError } = require('./helpers');
 const indexRouter = require('./routes');
-require('dotenv').config();
 require('./config/passport');
 
 const app = express();
