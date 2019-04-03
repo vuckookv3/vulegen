@@ -10,7 +10,7 @@ const thisdir = process.cwd();
 
 program
     .name('vulegen')
-    .version('0.1.0', '-v, --version');
+    .version('1.0.2', '-v, --version');
 
 program
     .command('init <name>')
