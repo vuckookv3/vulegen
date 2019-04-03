@@ -23,7 +23,7 @@ AdminSchema.methods.comparePassword = async function (pass) {
 
 AdminSchema.methods.generateJWT = function () {
     const whatToSign = { _id: this._id };
-    return jwt.sign(whatToSign, secret, { expiresIn: 60 * 60 * 24 })
+    return jwt.sign(whatToSign, process.env.ADMIN_JWT, { expiresIn: 60 * 60 * 24 })
 };
 
 // hooks

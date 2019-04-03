@@ -2,13 +2,15 @@ const express = require('express');
 const router = express.Router();
 const { aW, AppError } = require('../../helpers');
 const { <%= name %> } = require('../../models');
-
+<%- user == 'User' ? `const { isLoggedIn } = require('../../middlewares');` : '' %>
+<% if(crud.includes('r')) { %>
 // INDEX
 router.get('/', aW(async (req, res) => {
     const found = await <%= name %>.find({}).exec();
     res.json(found);
 }));
-
+<% } %>
+<% if(crud.includes('c')) { %>
 // CREATE
 router.post('/', aW(async (req, res) => {
     const doc = new <%= name %>({ ...req.body });
@@ -17,14 +19,16 @@ router.post('/', aW(async (req, res) => {
 
     res.json(doc);
 }));
-
+<% } %>
+<% if(crud.includes('r')) { %>
 // SHOW
 router.get('/:id', aW(async (req, res) => {
     const found = await <%= name %>.findById(req.params.id).exec();
     if (!found) throw new AppError(404);
     res.json(found);
 }));
-
+<% } %>
+<% if(crud.includes('u')) { %>
 // UPDATE
 router.put('/:id', aW(async (req, res) => {
     const found = await <%= name %>.findById(req.params.id).exec();
@@ -35,7 +39,8 @@ router.put('/:id', aW(async (req, res) => {
 
     res.json(found);
 }));
-
+<% } %>
+<% if(crud.includes('d')) { %>
 // DELETE
 router.delete('/:id', aW(async (req, res) => {
     const found = await <%= name %>.findById(req.params.id).exec();
@@ -45,7 +50,7 @@ router.delete('/:id', aW(async (req, res) => {
 
     res.json(found);
 }));
-
+<% } %>
 
 module.exports = router;
 

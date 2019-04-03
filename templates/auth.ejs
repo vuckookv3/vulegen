@@ -4,6 +4,14 @@ const { aW, AppError } = require('../../helpers');
 const { <%= name %> } = require('../../models');
 const { <%= name == 'User' ? 'isLoggedIn' : 'isAdmin' %> } = require('../../middlewares');
 
+<% if (name == 'Admin') { %>
+// you can delete this piece after admin is created, or u can manually create one
+(async () => {
+    const admin = await Admin.findOne({ username: 'admin' }).exec();
+    if (!admin) await Admin.create({ username: 'admin', password: 'admin' });
+})()
+<% } %>
+
 router.post('/login', aW(async (req, res) => {
     const { username, password } = req.body;
 
