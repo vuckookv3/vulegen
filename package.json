@@ -1,6 +1,6 @@
 {
   "name": "vulegen",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Express API Server Generator",
   "author": "Marko Vucetic <vuckoo@hotmail.com>",
   "main": "bin/index.js",
